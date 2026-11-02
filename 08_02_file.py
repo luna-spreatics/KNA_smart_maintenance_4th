@@ -55,11 +55,36 @@ FILE = "data/08_press.csv"
 
 
 # csv.writer
-with open("data/08_summary.csv", "w", encoding="utf-8", newline="") as f:
-    writer = csv.writer(f)
-    writer.writerow(["설비ID", "상태"])     # 헤더
-    writer.writerow(["PRESS-01", 1])
-    writer.writerow(["PRESS-02", 1])
+# with open("data/08_summary.csv", "w", encoding="utf-8", newline="") as f:
+#     writer = csv.writer(f)
+#     writer.writerow(["설비ID", "상태"])     # 헤더
+#     writer.writerow(["PRESS-01", 1])
+#     writer.writerow(["PRESS-02", 1])
 
-with open("data/08_summary.csv", "r", encoding="utf-8") as f:
-    print(f.read())
+# with open("data/08_summary.csv", "r", encoding="utf-8") as f:
+#     print(f.read())
+
+# 실습 6
+
+# 새로운 리스트 변수 선언
+list = []
+
+with open("data/08_press.csv", "r", encoding="utf-8") as f:
+    # 헤더 값 건너뛰기
+    reader = csv.reader(f)
+    header = next(reader)
+    print(header)
+
+    # 전류 값 기준 90 초과 값만 새로운 리스트 담기
+    for row in reader:
+        current = float(row[4])
+        if current > 90:
+            list.append(row)
+
+# 조건에 맞는 데이터를 새 CSV로 저장
+with open("08_current_over90.csv", "w", encoding="utf-8", newline="") as f:
+    writer = csv.writer(f)
+    writer.writerow(header)
+    writer.writerows(list)
+
+print("저장된 행 수:", len(list))
