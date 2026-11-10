@@ -26,27 +26,65 @@ def col(c):
 # - 25, 50, 75 백분위수 -> 1사분위, 중앙값, 3사분위
 # - 평균과 달리 극단적인 이상값에 휘둘리지 않음
 
-vib_s = np.array([2.0, 2.2, 2.5, 2.8, 3.0, 6.5])
-print(np.round(float(np.percentile(vib_s, 25)), 2))   # 2.28
-print(np.round(float(np.percentile(vib_s, 75)), 2))   # 2.95
+# vib_s = np.array([2.0, 2.2, 2.5, 2.8, 3.0, 6.5])
+# print(np.round(float(np.percentile(vib_s, 25)), 2))   # 2.28
+# print(np.round(float(np.percentile(vib_s, 75)), 2))   # 2.95
 
-# 여러 자리 한번에
-print(np.round(np.percentile(vib_s, [25, 50, 75]), 2))    # [2.28 2.65 2.95]
+# # 여러 자리 한번에
+# print(np.round(np.percentile(vib_s, [25, 50, 75]), 2))    # [2.28 2.65 2.95]
 
-# quantile : 25 -> 0.25
-print(np.round(float(np.quantile(vib_s, 0.25)), 2))     # 2.28
+# # quantile : 25 -> 0.25
+# print(np.round(float(np.quantile(vib_s, 0.25)), 2))     # 2.28
 
-# 사분위 기반 이상치 범위 - IQR
+# # 사분위 기반 이상치 범위 - IQR
 
-q1, q3 = np.percentile(vib_s, [25, 75])
-iqr = q3 - q1
-upper = q3 + 1.5 * iqr
-print(vib_s[vib_s > upper])
+# q1, q3 = np.percentile(vib_s, [25, 75])
+# iqr = q3 - q1
+# upper = q3 + 1.5 * iqr
+# print(vib_s[vib_s > upper])
 
 
-# 평균/표준편차로 정규화 - z-score
-# - 부호의 의미: 양수는 평균보다 위, 음수는 아래
-# - 방향 무시하고 크기만 보려면 절댓값 필요
+# # 평균/표준편차로 정규화 - z-score
+# # - 부호의 의미: 양수는 평균보다 위, 음수는 아래
+# # - 방향 무시하고 크기만 보려면 절댓값 필요
 
-z = (vib_s - np.mean(vib_s)) / np.std(vib_s)
-print(vib_s[np.abs(z) > 2])
+# z = (vib_s - np.mean(vib_s)) / np.std(vib_s)
+# print(vib_s[np.abs(z) > 2])
+
+
+# 센서 간 상관관계 - corrcoef
+# - 세기는 절댓값이 정함. +0.99와 -0.99는 세기가 똑같고 방향만 반대
+# - 양수: 한쪽이 오르면 다른 한쪽도 오름 / 음수는 반대
+# - 0에 가까움 -> 관계가 없는 상태
+
+temp = np.array([70, 72, 74, 76, 78])
+vib = np.array([2.0, 2.2, 2.5, 2.7, 3.0])
+print(np.round(float(np.corrcoef(temp, vib)[0, 1]), 3))   # 0.998
+
+# 표 (행렬)
+print(np.round(np.corrcoef(temp, vib), 3)) 
+# [[1.    0.998]
+#  [0.998 1.   ]]
+# 온도-온도, 온도-진동, 진동-온도, 진동-진동 네 조합을 모두 계산해 줌
+
+
+# 2D 배열 axis별 통계 활용
+# 행은 센서, 열은 시점인 행렬 axis로 방향을 정해 통계
+# axis = 1 - 각 행을 옆으로 > 센서별 통계
+# axis = 0 - 각 열을 아래로 > 시점별 통계
+
+data = np.array([[70., 72., 74.], [2.0, 2.2, 2.5]])
+print(np.round(np.mean(data, axis = 1), 2))     # [72.    2.23]
+print(np.round(np.mean(data, axis = 0), 2))     # [36.   37.1  38.25]
+
+
+# 변화점 탐지
+# - 누적 합으로 찾는 원리
+# - 각 값에서 전체 평균을 빼면 평균보다 작은 값은 음수, 큰 값은 양수
+# - 해당 값들을 앞에서부터 누적하면 평균보다 낮은 구간에서는 계속 내려가고,
+#   평균보다 높은 구간에서는 계속 올라감
+# - 그래서 누적 곡선이 가장 낮아지는 자리가 내려가기를 멈추고 올라가기 시작한 자리
+
+v = np.array([2.0, 2.1, 2.0, 5.0, 5.2, 5.1])
+cs = np.cumsum(v - np.mean(v))
+print(np.argmin(cs))      # 2
