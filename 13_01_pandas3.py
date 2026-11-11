@@ -60,3 +60,15 @@ print(a.shape)
 b = df.iloc[0:5, [2, 6]]
 print(b.shape)
 print(a.equals(b))
+
+# 실습 4
+df = pd.read_csv(F_SHOT)
+print(df.shape)
+print(df.columns.tolist())
+
+a = df.loc[0:9, ['설비ID', '비스킷두께', '품질등급']]
+print(a.shape)
+
+b = df.iloc[-5:]
+print(b.shape)
+print(b['샷'].tolist())
